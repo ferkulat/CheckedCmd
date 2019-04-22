@@ -8,5 +8,5 @@ set(SOURCE_FILES TestMain.cpp ArgumentsTest.cpp)
 add_executable(tests ${SOURCE_FILES})
 add_test(
         NAME tests
-        COMMAND "${CMAKE_CTEST_COMMAND}"
+        COMMAND tests
 )

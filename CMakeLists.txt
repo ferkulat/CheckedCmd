@@ -17,9 +17,9 @@ include(warnings)
 include(clara)
 
 ## it spams the target list in CLion
-#include(CTestConfig)
-#include(CTest)
-#enable_testing()
+include(CTestConfig)
+include(CTest)
+enable_testing()
 
 
 include_directories(include)
