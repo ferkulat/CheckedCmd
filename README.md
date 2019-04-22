@@ -12,12 +12,12 @@ The caller does not need to use mutable variables.
 
 The parser needs distinct types as input.
 ```c++
-    using CmdHasHeadLine   = CheckedCmd::Flag<HasHeadLine>;                //optional  
-    using CmdOutputFile    = CheckedCmd::Param<std::optional<OutputFile>>; //optional
-    using CmdExcelRowLimit = CheckedCmd::Param<std::optional<ExcelRow>>;
-    using CmdTableName     = CheckedCmd::Param<TableName>;                //required
-    using CmdInputFile     = CheckedCmd::Arg<InputFile>;                  //required
-    using CmdOptArg        = CheckedCmd::Arg<std::optional<std::string>>; //optional
+using CmdHasHeadLine   = CheckedCmd::Flag<HasHeadLine>;                //optional  
+using CmdOutputFile    = CheckedCmd::Param<std::optional<OutputFile>>; //optional
+using CmdExcelRowLimit = CheckedCmd::Param<std::optional<ExcelRow>>;
+using CmdTableName     = CheckedCmd::Param<TableName>;                //required
+using CmdInputFile     = CheckedCmd::Arg<InputFile>;                  //required
+using CmdOptArg        = CheckedCmd::Arg<std::optional<std::string>>; //optional
 ```
 These types need to be default constructable and provide an overload for 
 ```c++
@@ -25,25 +25,25 @@ std::istream& operator>>(std::istream&, type&);
 ```  
 We need to provide callables for range checks for each type:
 ```c++
-    bool OutputFileValidator(OutputFile const &outputFile) {
-        return outputFile.Get().size() < 6;
-    }
+bool OutputFileValidator(OutputFile const &outputFile) {
+    return outputFile.Get().size() < 6;
+}
 
-    bool InputFileValidator(InputFile const &inputFile) {
-        return inputFile.Get().size() < 100;
-    }
+bool InputFileValidator(InputFile const &inputFile) {
+    return inputFile.Get().size() < 100;
+}
 
-    bool RowLimitValidator(ExcelRow const &excelRow) {
-        return (excelRow.Get() > 0);
-    }
+bool RowLimitValidator(ExcelRow const &excelRow) {
+    return (excelRow.Get() > 0);
+}
 
-    bool TableNameValidator(TableName const &tableName) {
-        return (tableName.Get().size() < 5);
-    }
+bool TableNameValidator(TableName const &tableName) {
+    return (tableName.Get().size() < 5);
+}
 
-    auto const NoChecks = [](auto const &) { return true; };
-
+auto const NoChecks = [](auto const &) { return true; };
 ```
+
 Now the input gets parsed without introducing state.
 ``` ParseCmd``` returns a ```std::optional<std::tuple<...>>```:
 ```c++
