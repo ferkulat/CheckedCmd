@@ -1,4 +1,8 @@
+#https://github.com/Microsoft/GSL/blob/master/.travis.yml
+
+
 language: cpp
+os: linux
 dist: trusty
 common_sources: &all_sources
   - ubuntu-toolchain-r-test
@@ -28,6 +32,18 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+    # Clang 5.0
+    - env: COMPILER=clang++-5.0
+      addons: &clang50
+        apt:
+          packages:
+            - clang-5.0
+            - g++-7
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
               key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
 
     # 2/ Linux GCC Builds
