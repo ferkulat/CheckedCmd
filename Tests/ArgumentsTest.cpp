@@ -2,7 +2,7 @@
 // Created by marcel on 12/23/17.
 //
 
-#include <doctest.h>
+#include <catch.hpp>
 #include <checked_cmd.h>
 #include <cstdint>
 
@@ -44,53 +44,53 @@ namespace ArgumentsTest {
 
     auto const NoChecks = [](auto const &) { return true; };
 
-    TEST_SUITE ("RequriedParamater") {
+    TEST_CASE ("RequriedParamater") {
         auto const config = std::make_tuple(CmdTableName(Hint(""), ShortName("-T"),
                                                          LongName("--TableName"),
                                                          Description("lol"),
                                                          TableNameValidator
                                             )
         );
-        TEST_CASE ("missing leads to failure") {
+        SECTION ("missing leads to failure") {
             auto success = ParseCmdArgsTuple({"prgname", "-l 2", "-H", "-h", "file.csv", "file1.csv", "string"},
                                              config
             );
             CHECK(!success.has_value());
         }
 
-        TEST_CASE ("successfully parsed but failing check leads to failure") {
+        SECTION ("successfully parsed but failing check leads to failure") {
             auto success = ParseCmdArgsTuple({"prgname", "-T files"}, config);
             CHECK(!success.has_value());
         }
 
-        TEST_CASE ("successfully parsed and passing check leads to success") {
+        SECTION ("successfully parsed and passing check leads to success") {
             auto success = ParseCmdArgsTuple({"prgname", "-T file"}, config);
             CHECK(success.has_value());
         }
     }
-    TEST_SUITE ("OptionalParameter") {
+    TEST_CASE ("OptionalParameter") {
         auto const config = std::make_tuple(CmdOutputFile(Hint(""), ShortName("-O"),
                                                           LongName("--OutFile"),
                                                           Description("lol"),
                                                           OutputFileValidator
                                             )
         );
-        TEST_CASE ("successfully parsed and passing check leads to success") {
+        SECTION ("successfully parsed and passing check leads to success") {
             auto success = ParseCmdArgsTuple({"prgname", "-O file"}, config);
             CHECK(success.has_value());
         }
 
-        TEST_CASE ("successfully parsed and failing check leads to failure") {
+        SECTION ("successfully parsed and failing check leads to failure") {
             auto success = ParseCmdArgsTuple({"prgname", "-O outfile"}, config);
             CHECK(!success.has_value());
         }
 
-        TEST_CASE ("not parsed leads to success") {
+SECTION ("not parsed leads to success") {
             auto success = ParseCmdArgsTuple({"prgname"}, config);
             CHECK(success.has_value());
         }
     }
-    TEST_CASE ("full example") {
+TEST_CASE ("full example") {
 
         auto const success = ParseCmd({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"}
                                 ,CmdHasHeadLine(ShortName("-H")
@@ -128,12 +128,12 @@ namespace ArgumentsTest {
 
         if (success) {
             auto const parsed_args = success.value();
-            CHECK_EQ ( InputFile("file.csv"),     std::get<CmdInputFile>(parsed_args).value());
-            CHECK_EQ ( SecInputFile("file1.csv"), std::get<CmdSecondInputFile>(parsed_args).value());
-            CHECK_EQ ( HasHeadLine(true),         std::get<CmdHasHeadLine>(parsed_args).value());
-            CHECK_EQ ( OutputFile("lol"),         std::get<CmdOutputFile>(parsed_args).value_or(OutputFile("lol")));
-            CHECK_EQ ( true,                      std::get<CheckedCmd::Help>(parsed_args).value());
-            CHECK_EQ ( true,                      std::get<CmdOptArg>(parsed_args).value().has_value());
+            REQUIRE ( InputFile("file.csv")     == std::get<CmdInputFile>(parsed_args).value());
+            REQUIRE ( SecInputFile("file1.csv") == std::get<CmdSecondInputFile>(parsed_args).value());
+            REQUIRE ( HasHeadLine(true)         == std::get<CmdHasHeadLine>(parsed_args).value());
+            REQUIRE ( OutputFile("lol")         == std::get<CmdOutputFile>(parsed_args).value_or(OutputFile("lol")));
+            REQUIRE ( true                      == std::get<CheckedCmd::Help>(parsed_args).value());
+            REQUIRE ( true                      == std::get<CmdOptArg>(parsed_args).value().has_value());
         }
     }
 }
