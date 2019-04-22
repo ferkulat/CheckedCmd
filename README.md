@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ferkulat/CheckedCmd.svg?branch=master)](https://travis-ci.org/ferkulat/CheckedCmd)
+
 # CheckedCmd
 
 This is a command line parser library which is typed an checked. It makes use of [Clara](https://github.com/catchorg/Clara) to do all the hard work behind the scenes.

@@ -1,0 +1,64 @@
+language: cpp
+dist: trusty
+common_sources: &all_sources
+  - ubuntu-toolchain-r-test
+
+matrix:
+  include:
+
+    # 1/ Linux Clang Builds
+    # Clang 7.0
+    - env: COMPILER=clang++-7
+      addons: &clang70
+        apt:
+          packages:
+            - clang-7
+            - g++-7
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+
+    # 2/ Linux GCC Builds
+    - os: linux
+      compiler: gcc
+      addons: &gcc7
+        apt:
+          sources: *all_sources
+          packages: ['g++-7']
+      env: COMPILER='g++-7'
+      
+    - os: linux
+      compiler: gcc
+      addons: *gcc7
+      env: COMPILER='g++-7'
+
+
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+        which cmake || brew install cmake;
+    fi
+
+before_script:
+  - export CXX=${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR}
+    # Use Debug builds for collecting coverage
+  - cmake -H. -BBuild-Debug -DCMAKE_BUILD_TYPE=Debug
+    # Don't bother with release build for coverage build
+  - cmake -H. -BBuild-Release -DCMAKE_BUILD_TYPE=Release
+
+
+script:
+  - cd Build-Debug
+  - make -j 2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+    # Go to release build
+  - cd ../Build-Release
+  - make -j 2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
