@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ferkulat/CheckedCmd.svg?branch=master)](https://travis-ci.org/ferkulat/CheckedCmd)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/ferkulat/CheckedCmd?brach=master&svg=true)](https://ci.appveyor.com/project/ferkulat/CheckedCmd)
 
 # CheckedCmd
 
