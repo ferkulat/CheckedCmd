@@ -73,7 +73,7 @@ before_build:
 
 # build with MSBuild
 build:
-  project: Build\CheckedCmd.sln         # path to Visual Studio solution or project
+  project: Build\checked_cmd.sln         # path to Visual Studio solution or project
   parallel: true                        # enable MSBuild parallel builds
   verbosity: normal                     # MSBuild verbosity level {quiet|minimal|normal|detailed}
 
