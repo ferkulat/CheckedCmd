@@ -25,7 +25,10 @@ using CmdOptArg        = CheckedCmd::Arg<std::optional<std::string>>; //optional
 These types need to be default constructable and provide an overload for 
 ```c++
 std::istream& operator>>(std::istream&, type&);
-```  
+``` 
+This library provides a convenient way to create distinct types.
+Please have a look in the testing source code.
+ 
 We need to provide callables for range checks for each type:
 ```c++
 bool OutputFileValidator(OutputFile const &outputFile) {
@@ -50,7 +53,13 @@ auto const NoChecks = [](auto const &) { return true; };
 Now the input gets parsed without introducing state.
 ``` ParseCmd``` returns a ```std::optional<std::tuple<...>>```:
 ```c++
-auto const success = ParseCmd({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"}
+auto args = detail::CopyToArgs({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"});
+auto argv = detail::IntoPtrs(args);
+auto argc = args.size();
+// The lines above are used for testing only
+// please have a look in the testing source code
+
+auto const success = ParseCmd(argc, argv
                         ,CmdHasHeadLine(ShortName("-H")
                                         ,LongName("--HasHeadLine")
                                         ,Description("lol")

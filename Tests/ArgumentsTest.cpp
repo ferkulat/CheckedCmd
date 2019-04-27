@@ -34,6 +34,7 @@ namespace ArgumentsTest {
     TYPE_SAFE(std::string, SecInputFile)
     TYPE_SAFE(std::string, OutputFile)
     TYPE_SAFE(std::string, TableName)
+    TYPE_SAFE(char,        CsvSep)
 
     using CmdHasHeadLine     = CheckedCmd::Flag<HasHeadLine>;
     using CmdOutputFile      = CheckedCmd::Param<std::optional<OutputFile>>;
@@ -42,6 +43,8 @@ namespace ArgumentsTest {
     using CmdOptArg          = CheckedCmd::Arg<std::optional<std::string>>;
     using CmdExcelRowLimit   = CheckedCmd::Param<std::optional<ExcelRow>>;
     using CmdTableName       = CheckedCmd::Param<TableName>;
+    using OptCmdCsvSep       = CheckedCmd::Param<std::optional<CsvSep>>;
+    using CmdCsvSep          = CheckedCmd::Param<CsvSep>;
 
     bool OutputFileValidator(OutputFile const &outputFile) {
         return outputFile.Get().size() < 6;
@@ -111,11 +114,73 @@ namespace ArgumentsTest {
             CHECK(success.has_value());
         }
     }
+    TEST_CASE("std::optional<Typesafe<char,typetag>>"){
+        auto const config = std::make_tuple(OptCmdCsvSep(Hint(""), ShortName("-S"),
+                                                          LongName("--Separator"),
+                                                          Description("lol"),
+                                                          NoChecks
+                                                     )
+                                           );
+
+        SECTION ("without quotes") {
+            auto args = detail::CopyToArgs({"prgname","-S ,"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<OptCmdCsvSep>(success.value()).value_or(CsvSep('@')) == CsvSep(','));
+        }
+        SECTION ("with single quotes") {
+            auto args = detail::CopyToArgs({"prgname","-S ','"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<OptCmdCsvSep>(success.value()).value_or(CsvSep('@')) == CsvSep(','));
+        }
+        SECTION ("with double quotes") {
+            auto args = detail::CopyToArgs({"prgname",R"(-S ",")"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<OptCmdCsvSep>(success.value()).value_or(CsvSep('@')) == CsvSep(','));
+        }
+    }
+
+    TEST_CASE("Typesafe<char,typetag>"){
+        auto const config = std::make_tuple(CmdCsvSep(Hint(""), ShortName("-S"),
+                                                      LongName("--Separator"),
+                                                      Description("lol"),
+                                                      NoChecks
+                                            )
+        );
+
+        SECTION ("without quotes") {
+            auto args = detail::CopyToArgs({"prgname","-S ,"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
+        }
+        SECTION ("with single quotes") {
+            auto args = detail::CopyToArgs({"prgname","-S ','"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
+        }
+        SECTION ("with double quotes") {
+            auto args = detail::CopyToArgs({"prgname",R"(-S ",")"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(success.has_value());
+            REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
+        }
+        SECTION ("missing fails") {
+            auto args = detail::CopyToArgs({"prgname"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
+            CHECK(!success.has_value());
+        }
+
+    }
 
     TEST_CASE ("full example") {
         auto args = detail::CopyToArgs({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"});
-
-        auto const success = ParseCmd(args.size(), detail::IntoPtrs(args)
+        auto argv = detail::IntoPtrs(args);
+        auto argc = args.size();
+        auto const success = ParseCmd(argc, argv
                                 ,CmdHasHeadLine(ShortName("-H")
                                                 ,LongName("--HasHeadLine")
                                                 ,Description("lol")
