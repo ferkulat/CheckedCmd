@@ -20,7 +20,7 @@ namespace CheckedCmd{
         template< typename T, typename TypeTag>
         std::istream& operator>>(std::istream& is, Typesafe<T, TypeTag> &target);
         template< typename T, typename TypeTag>
-        std::ostream& operator<<(std::ostream& is, Typesafe<T, TypeTag> &target);
+        std::ostream& operator<<(std::ostream& os, Typesafe<T, TypeTag> &target);
         template< typename T, typename TypeTag>
         class Typesafe{
             T value;
@@ -366,9 +366,9 @@ namespace CheckedCmd{
     };
 
     template<typename ARG_TUPLE>
-    auto ParseCmdArgsTuple(std::initializer_list<std::string> tokens, ARG_TUPLE arg)-> std::optional<ARG_TUPLE>{
+    auto ParseCmdArgsTuple(int argc, char**argv , ARG_TUPLE arg)-> std::optional<ARG_TUPLE>{
         auto const parser = BindToClara(arg);
-        auto const result = parser.parse(clara::Args(std::move(tokens)));
+        auto const result = parser.parse(clara::Args(argc, argv));
 
         if (IsParseError(result) || IsInvalid(arg))
             return std::nullopt;
@@ -384,8 +384,8 @@ namespace CheckedCmd{
     }
 
     template<typename ... ARGS>
-    auto ParseCmd(std::initializer_list<std::string> tokens, ARGS&& ... args){
-        return ParseCmdArgsTuple(std::move(tokens), Helpers::reverse(std::make_tuple( args ...)));
+    auto ParseCmd(int argc, char**argv, ARGS&& ... args){
+        return ParseCmdArgsTuple(argc, argv, Helpers::reverse(std::make_tuple( args ...)));
     }
 }
 

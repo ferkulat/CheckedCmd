@@ -5,8 +5,25 @@
 #include <catch.hpp>
 #include <checked_cmd.h>
 #include <cstdint>
+#include <cstring>
 
+namespace ArgumentsTest::detail {
+        auto CopyToArgs(std::initializer_list<std::string> const& list){
+            std::vector<std::unique_ptr<char[]>> result;
+            for (auto const &item: list){
+                result.push_back(std::make_unique<char[]>(item.size()+1));
+                std::strncpy(result.back().get(), item.c_str(), item.size()+1);
+            }
+            return result;
+        }
+        auto IntoPtrs(std::vector<std::unique_ptr<char[]>> & args){
+            auto result = new char*[args.size()];
+            std::transform(std::begin(args), std::end(args), result, [](auto & uptr){ return uptr.get();});
+            return result;
+        }
+}
 namespace ArgumentsTest {
+
     #define TYPE_SAFE(Type, Name) using Name = CheckedCmdTypesafe::Typesafe<Type, struct TypeTag##Name>;
 
     using namespace CheckedCmd;
@@ -52,19 +69,20 @@ namespace ArgumentsTest {
                                             )
         );
         SECTION ("missing leads to failure") {
-            auto success = ParseCmdArgsTuple({"prgname", "-l 2", "-H", "-h", "file.csv", "file1.csv", "string"},
-                                             config
-            );
+            auto args = detail::CopyToArgs({"prgname", "-l 2", "-H", "-h", "file.csv", "file1.csv", "string"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
         SECTION ("successfully parsed but failing check leads to failure") {
-            auto success = ParseCmdArgsTuple({"prgname", "-T files"}, config);
+            auto args = detail::CopyToArgs({"prgname", "-T files"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
         SECTION ("successfully parsed and passing check leads to success") {
-            auto success = ParseCmdArgsTuple({"prgname", "-T file"}, config);
+            auto args = detail::CopyToArgs({"prgname", "-T file"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
         }
     }
@@ -76,23 +94,28 @@ namespace ArgumentsTest {
                                             )
         );
         SECTION ("successfully parsed and passing check leads to success") {
-            auto success = ParseCmdArgsTuple({"prgname", "-O file"}, config);
+            auto args = detail::CopyToArgs({"prgname", "-O file"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
         }
 
         SECTION ("successfully parsed and failing check leads to failure") {
-            auto success = ParseCmdArgsTuple({"prgname", "-O outfile"}, config);
+            auto args = detail::CopyToArgs({"prgname", "-O outfile"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
-SECTION ("not parsed leads to success") {
-            auto success = ParseCmdArgsTuple({"prgname"}, config);
+        SECTION ("not parsed leads to success") {
+            auto args = detail::CopyToArgs({"prgname"});
+            auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
         }
     }
-TEST_CASE ("full example") {
 
-        auto const success = ParseCmd({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"}
+    TEST_CASE ("full example") {
+        auto args = detail::CopyToArgs({"prgname", "-l 2",  "-H", "-h", "file.csv", "file1.csv", "string"});
+
+        auto const success = ParseCmd(args.size(), detail::IntoPtrs(args)
                                 ,CmdHasHeadLine(ShortName("-H")
                                                 ,LongName("--HasHeadLine")
                                                 ,Description("lol")
