@@ -12,6 +12,7 @@
 #include <vector>
 #include <clara.hpp>
 #include <functional>
+#include <regex>
 
 namespace CheckedCmd{
     namespace CheckedCmdTypesafe{
@@ -244,14 +245,6 @@ namespace CheckedCmd{
         }
     };
 
-    template<typename Type>
-    struct ClaraParamBinder<std::optional<Type>>{
-        static clara::Parser bind(clara::Parser const& parser, Param<std::optional<Type>>& t){
-            return parser|clara::Opt(t.val,t.GetHint().Get())
-            [t.GetShortName().Get()][t.GetName().Get()]
-                    (t.GetDescription().Get());
-        }
-    };
     template<>
     class Flag<HelpFlag>{
     public:
@@ -294,6 +287,7 @@ namespace CheckedCmd{
         }
     };
 
+
     template<typename Type>
     class Param<std::optional< Type>>: public ParamBase{
     public:
@@ -317,6 +311,120 @@ namespace CheckedCmd{
         friend struct ClaraParamBinder<std::optional<Type>>;
         std::optional< Type> val;
         std::function<bool(Type)> predicate;
+    };
+
+    template<typename TypeTag>
+    class Param<std::optional< CheckedCmdTypesafe::Typesafe<char, TypeTag>>>: public ParamBase{
+    public:
+        Param( Hint hint_, ShortName short_name_, LongName long_name_, Description description_, std::function<bool(char)> pred)
+                :ParamBase(std::move(hint_)
+                ,std::move(short_name_)
+                ,std::move(long_name_)
+                ,std::move(description_)
+        )
+                 ,predicate(pred)
+        {}
+
+        auto value_or(CheckedCmdTypesafe::Typesafe<char, TypeTag> val_)const -> CheckedCmdTypesafe::Typesafe<char, TypeTag>{
+            if(val.has_value()) {
+                if (std::regex_match(val.value(), std::regex(R"(^.$)"))) {
+                    return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[0]);
+                }
+                if (std::regex_match(val.value(), std::regex(R"(^'.'$)"))) {
+                    return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[1]);
+                }
+                if (std::regex_match(val.value(), std::regex(R"(^"."$)"))) {
+                    return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[1]);
+                }
+            }
+            return val_;
+        }
+
+        bool IsInValid()const{
+            if (!val.has_value()) return false;
+
+            if(std::regex_match(val.value(), std::regex(R"(^.$)"))){
+                return !predicate(val.value()[0]);
+            }
+            if(std::regex_match(val.value(), std::regex(R"(^'.'$)"))){
+                return !predicate(val.value()[1]);
+            }
+            if (std::regex_match(val.value(), std::regex(R"(^"."$)"))) {
+                return !predicate(val.value()[1]);
+            }
+            return true;
+        }
+    private:
+        friend  struct ClaraParamBinder<std::optional<CheckedCmdTypesafe::Typesafe<char, TypeTag>>>;
+        std::optional< std::string> val;
+        std::function<bool(char)> predicate;
+    };
+
+    template<typename TypeTag>
+    class Param<CheckedCmdTypesafe::Typesafe<char, TypeTag>>: public ParamBase{
+    public:
+        Param( Hint hint_, ShortName short_name_, LongName long_name_, Description description_, std::function<bool(char)> pred)
+                :ParamBase(std::move(hint_)
+                ,std::move(short_name_)
+                ,std::move(long_name_)
+                ,std::move(description_)
+        )
+                 ,predicate(pred)
+        {}
+
+        auto value()const -> CheckedCmdTypesafe::Typesafe<char, TypeTag>{
+            if (std::regex_match(val, std::regex(R"(^'.'$)"))) {
+                return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val[1]);
+            }
+            if (std::regex_match(val, std::regex(R"(^"."$)"))) {
+                return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val[1]);
+            }
+            return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val[0]);
+        }
+
+        bool IsInValid()const{
+            if(std::regex_match(val, std::regex(R"(^.$)"))){
+                return !predicate(val[0]);
+            }
+            if(std::regex_match(val, std::regex(R"(^'.'$)"))){
+                return !predicate(val[1]);
+            }
+            if (std::regex_match(val, std::regex(R"(^"."$)"))) {
+                return !predicate(val[1]);
+            }
+            return true;
+        }
+    private:
+        friend  struct ClaraParamBinder<CheckedCmdTypesafe::Typesafe<char, TypeTag>>;
+        std::string val;
+        std::function<bool(char)> predicate;
+    };
+
+    template<typename TypeTag>
+    struct ClaraParamBinder<std::optional<CheckedCmdTypesafe::Typesafe<char, TypeTag>>>{
+        static clara::Parser bind(clara::Parser const& parser, Param<std::optional<CheckedCmdTypesafe::Typesafe<char, TypeTag>>>& t){
+            return parser|clara::Opt(t.val,t.GetHint().Get())
+            [t.GetShortName().Get()][t.GetName().Get()]
+                    (t.GetDescription().Get());
+        }
+    };
+
+    template<typename TypeTag>
+    struct ClaraParamBinder<CheckedCmdTypesafe::Typesafe<char, TypeTag>>{
+        static clara::Parser bind(clara::Parser const& parser, Param<CheckedCmdTypesafe::Typesafe<char, TypeTag>>& t){
+            return parser|clara::Opt(t.val,t.GetHint().Get())
+            [t.GetShortName().Get()][t.GetName().Get()]
+                    (t.GetDescription().Get()).required();
+        }
+    };
+
+    template<typename Type>
+    struct ClaraParamBinder<std::optional<Type>>{
+        static clara::Parser bind(clara::Parser const& parser, Param<std::optional<Type>>& t){
+            return parser|clara::Opt(t.val,t.GetHint().Get())
+            [t.GetShortName().Get()][t.GetName().Get()]
+                    (t.GetDescription().Get());
+        }
     };
 
     template<typename Type>
