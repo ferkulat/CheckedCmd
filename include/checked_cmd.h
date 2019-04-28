@@ -21,7 +21,7 @@ namespace CheckedCmd{
         template< typename T, typename TypeTag>
         std::istream& operator>>(std::istream& is, Typesafe<T, TypeTag> &target);
         template< typename T, typename TypeTag>
-        std::ostream& operator<<(std::ostream& os, Typesafe<T, TypeTag> &target);
+        std::ostream& operator<<(std::ostream& os, Typesafe<T, TypeTag> const& target);
         template< typename T, typename TypeTag>
         class Typesafe{
             T value;
@@ -34,7 +34,7 @@ namespace CheckedCmd{
             }
         private:
             friend std::istream& operator>> <T, TypeTag>(std::istream& is, Typesafe<T, TypeTag> &target);
-            friend std::ostream& operator<< <T, TypeTag>(std::ostream& os, Typesafe<T, TypeTag> &target);
+            friend std::ostream& operator<< <T, TypeTag>(std::ostream& os, Typesafe<T, TypeTag> const& target);
 
         };
         template< typename T, typename TypeTag>
@@ -43,7 +43,7 @@ namespace CheckedCmd{
             return is;
         }
         template< typename T, typename TypeTag>
-        std::ostream& operator<<(std::ostream& os, Typesafe<T, TypeTag> &target){
+        std::ostream& operator<<(std::ostream& os, Typesafe<T, TypeTag> const& target){
             os << target.value;
             return os;
         }
