@@ -26,6 +26,7 @@ namespace CheckedCmd{
         class Typesafe{
             T value;
         public:
+            using type = T;
             Typesafe()=default;
             constexpr explicit Typesafe(T t_):value(std::move(t_)){}
             constexpr T const& Get()const{return value;}
