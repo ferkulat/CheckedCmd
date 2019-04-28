@@ -305,6 +305,14 @@ namespace CheckedCmd{
             return (val.has_value())?val.value():val_;
         }
 
+        bool has_value()const {
+            return val.has_value();
+        }
+
+        auto value()const {
+            return val.value();
+        }
+
         bool IsInValid()const{
             return val.has_value() && !predicate(val.value());
         };
@@ -339,6 +347,20 @@ namespace CheckedCmd{
                 }
             }
             return val_;
+        }
+
+        bool has_value()const {
+            return val.has_value();
+        }
+
+        auto value()const {
+            if (std::regex_match(val.value(), std::regex(R"(^'.'$)"))) {
+                return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[1]);
+            }
+            if (std::regex_match(val.value(), std::regex(R"(^"."$)"))) {
+                return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[1]);
+            }
+            return CheckedCmdTypesafe::Typesafe<char, TypeTag>(val.value()[0]);
         }
 
         bool IsInValid()const{
