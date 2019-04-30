@@ -5,8 +5,8 @@ include(catch2)
 #include(doctest)
 
 set(SOURCE_FILES TestMain.cpp ArgumentsTest.cpp)
-add_executable(tests ${SOURCE_FILES})
+add_executable(CheckedCmdTests ${SOURCE_FILES})
 add_test(
-        NAME tests
-        COMMAND tests
+        NAME CheckedCmdTests
+        COMMAND CheckedCmdTests
 )

@@ -10,15 +10,15 @@ os:
 
 environment:
     matrix:
-        - additional_flags: "/permissive- /std:c++latest"
-          wmain: 0
-
+#        - additional_flags: "/permissive- /std:c++latest"
+#          wmain: 0
+#
         - additional_flags: ""
           wmain: 0
-
-        - additional_flags: "/D_UNICODE /DUNICODE"
-          wmain: 1
-          coverage: 0
+#
+#        - additional_flags: "/D_UNICODE /DUNICODE"
+#          wmain: 1
+#          coverage: 0
 
 
 
@@ -79,4 +79,4 @@ build:
 
 test_script:
   - set CTEST_OUTPUT_ON_FAILURE=1
-  - cmd: ctest -j 2 -C %CONFIGURATION% || exit /b !ERRORLEVEL!
+  - cmd: .\misc\appveyorTestRunScript.bat
