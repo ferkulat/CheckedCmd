@@ -1,5 +1,8 @@
 #https://github.com/Microsoft/GSL/blob/master/.travis.yml
 
+branches:
+  except:
+  - /dev-appveyor.+/
 
 language: cpp
 os: linux
