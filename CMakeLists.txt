@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-set (MY_PROJECTNAME checked_cmd)
-
-project(${MY_PROJECTNAME} LANGUAGES CXX)
+project(checked_cmd LANGUAGES CXX)
 
 set(EXTERN_CLARA_TAG v1.1.5)
 
@@ -31,5 +29,3 @@ include_directories(include)
 
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(Tests)
-set(SOURCE_FILES main.cpp )
-add_executable(${MY_PROJECTNAME} ${SOURCE_FILES})
