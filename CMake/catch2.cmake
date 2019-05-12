@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 include(FetchContent)
+set(EXTERN_CATCH_HEADER_DIR ${EXTERN_DEPENDENCIES_DIR}/catch)
 set(EXTERN_CATCH_TAG v2.7.1)
 
 # ------------------------------------------------------------------------------
@@ -17,4 +18,4 @@ FetchContent_GetProperties(extern_catch2)
 if(NOT extern_catch2_POPULATED)
   FetchContent_Populate(extern_catch2)
 endif()
-include_directories(${EXTERN_CATCH_HEADER_DIR})
+include_directories(SYSTEM ${EXTERN_CATCH_HEADER_DIR})

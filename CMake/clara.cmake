@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+set(EXTERN_CLARA_TAG v1.1.5)
+set(EXTERN_CLARA_HEADER_DIR ${EXTERN_DEPENDENCIES_DIR}/clara)
 
 include(FetchContent)
 # ------------------------------------------------------------------------------

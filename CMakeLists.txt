@@ -2,15 +2,13 @@ cmake_minimum_required(VERSION 3.11)
 
 project(checked_cmd LANGUAGES CXX)
 
-set(EXTERN_CLARA_TAG v1.1.5)
-
 set(EXTERN_DEPENDENCIES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern)
-set(EXTERN_CLARA_HEADER_DIR ${EXTERN_DEPENDENCIES_DIR}/clara)
 
 # Provide path for scripts
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
-
+include(msvc_cplusplus)
 include(warnings)
+include(catch2)
 #include(MunkeiVersionFromGit)
 include(clara)
 
@@ -19,13 +17,8 @@ include(CTestConfig)
 include(CTest)
 enable_testing()
 
-if( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
-    #https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
-    #Clara checks for this value to enable support for std::optional
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus" )
-endif()
-
-include_directories(include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_STANDARD 17)
-add_subdirectory(Tests)
+set(CMAKE_CXX_EXTENSIONS OFF)
+add_subdirectory(Tests EXCLUDE_FROM_ALL)
