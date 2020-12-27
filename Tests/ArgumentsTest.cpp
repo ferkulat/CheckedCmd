@@ -2,8 +2,8 @@
 // Created by marcel on 12/23/17.
 //
 
-#include <catch.hpp>
-#include <checked_cmd.h>
+#include <doctest/doctest.h>
+#include "checked_cmd/checked_cmd.h"
 #include <cstdint>
 #include <cstring>
 
@@ -71,19 +71,19 @@ namespace ArgumentsTest {
                                                          TableNameValidator
                                             )
         );
-        SECTION ("missing leads to failure") {
+        SUBCASE ("missing leads to failure") {
             auto args = detail::CopyToArgs({"prgname", "-l 2", "-H", "-h", "file.csv", "file1.csv", "string"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
-        SECTION ("successfully parsed but failing check leads to failure") {
+        SUBCASE ("successfully parsed but failing check leads to failure") {
             auto args = detail::CopyToArgs({"prgname", "-T files"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
-        SECTION ("successfully parsed and passing check leads to success") {
+        SUBCASE ("successfully parsed and passing check leads to success") {
             auto args = detail::CopyToArgs({"prgname", "-T file"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
@@ -96,19 +96,19 @@ namespace ArgumentsTest {
                                                           OutputFileValidator
                                             )
         );
-        SECTION ("successfully parsed and passing check leads to success") {
+        SUBCASE ("successfully parsed and passing check leads to success") {
             auto args = detail::CopyToArgs({"prgname", "-O file"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
         }
 
-        SECTION ("successfully parsed and failing check leads to failure") {
+        SUBCASE ("successfully parsed and failing check leads to failure") {
             auto args = detail::CopyToArgs({"prgname", "-O outfile"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
         }
 
-        SECTION ("not parsed leads to success") {
+        SUBCASE ("not parsed leads to success") {
             auto args = detail::CopyToArgs({"prgname"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
@@ -122,19 +122,19 @@ namespace ArgumentsTest {
                                                      )
                                            );
 
-        SECTION ("without quotes") {
+        SUBCASE ("without quotes") {
             auto args = detail::CopyToArgs({"prgname","-S ,"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
             REQUIRE(std::get<OptCmdCsvSep>(success.value()).value_or(CsvSep('@')) == CsvSep(','));
         }
-        SECTION ("with single quotes") {
+        SUBCASE ("with single quotes") {
             auto args = detail::CopyToArgs({"prgname","-S ','"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
             REQUIRE(std::get<OptCmdCsvSep>(success.value()).value_or(CsvSep('@')) == CsvSep(','));
         }
-        SECTION ("with double quotes") {
+        SUBCASE ("with double quotes") {
             auto args = detail::CopyToArgs({"prgname",R"(-S ",")"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
@@ -150,25 +150,25 @@ namespace ArgumentsTest {
                                             )
         );
 
-        SECTION ("without quotes") {
+        SUBCASE ("without quotes") {
             auto args = detail::CopyToArgs({"prgname","-S ,"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
             REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
         }
-        SECTION ("with single quotes") {
+        SUBCASE ("with single quotes") {
             auto args = detail::CopyToArgs({"prgname","-S ','"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
             REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
         }
-        SECTION ("with double quotes") {
+        SUBCASE ("with double quotes") {
             auto args = detail::CopyToArgs({"prgname",R"(-S ",")"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(success.has_value());
             REQUIRE(std::get<CmdCsvSep>(success.value()).value() == CsvSep(','));
         }
-        SECTION ("missing fails") {
+        SUBCASE ("missing fails") {
             auto args = detail::CopyToArgs({"prgname"});
             auto success = ParseCmdArgsTuple(args.size(), detail::IntoPtrs(args), config );
             CHECK(!success.has_value());
